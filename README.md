@@ -25,7 +25,7 @@ It can:
 </picture>
 
 ## Requirements
-Only installing
+Only installing from the source is possible, at the moment. Xcode and required dependencies.
 
 ## Install from source
 
