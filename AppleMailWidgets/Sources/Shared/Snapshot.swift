@@ -16,8 +16,7 @@ struct MailItem: Codable, Identifiable, Equatable {
     var displaySubject: String { subject.isEmpty ? "(No subject)" : subject }
     var openURL: URL {
         var url = URLComponents()
-        // Retain the scheme and bundle identifiers so existing widgets keep working.
-        url.scheme = "unreadmail"
+        url.scheme = "applemailwidgets"
         url.host = "message"
         url.queryItems = [URLQueryItem(name: "id", value: String(id)),
                           URLQueryItem(name: "messageID", value: messageID)]
@@ -44,7 +43,7 @@ struct MailSnapshot: Codable, Equatable {
     var inboxes: [InboxSnapshot]? = nil
 
     static let empty = MailSnapshot(messages: [], unreadCount: 0, updatedAt: nil,
-        status: "setup", detail: "Open Mail Widgets to connect Apple Mail.")
+        status: "setup", detail: "Open AppleMailWidgets to connect Apple Mail.")
 
     static func newest(_ messages: [MailItem], limit: Int = 10) -> [MailItem] {
         var seen = Set<Int>()
@@ -91,7 +90,7 @@ struct MailSnapshot: Codable, Equatable {
 }
 
 enum SnapshotStore {
-    static let widgetID = "local.alexbp.UnreadMail.Widget"
+    static let widgetID = "com.applemailwidgets.AppleMailWidgets.Widget"
     static var url: URL {
         #if WIDGET_EXTENSION
         let root = FileManager.default.homeDirectoryForCurrentUser
@@ -100,7 +99,7 @@ enum SnapshotStore {
         let root = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Containers/\(widgetID)/Data", isDirectory: true)
         #endif
-        return root.appendingPathComponent("Library/Application Support/UnreadMail/snapshot.json")
+        return root.appendingPathComponent("Library/Application Support/AppleMailWidgets/snapshot.json")
     }
     static func load(from path: URL = url) -> MailSnapshot {
         guard let data = try? Data(contentsOf: path),

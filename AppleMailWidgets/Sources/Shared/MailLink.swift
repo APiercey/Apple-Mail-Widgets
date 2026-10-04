@@ -15,7 +15,7 @@ enum MailLink {
         return URL(string: "message://" + escaped)
     }
     static func destination(for url: URL, snapshot: MailSnapshot) -> MailDestination {
-        guard url.scheme == "unreadmail" else { return .inbox }
+        guard url.scheme == "applemailwidgets" else { return .inbox }
         if url.host == "settings" { return .settings }
         guard url.host == "message" else { return .inbox }
         let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []

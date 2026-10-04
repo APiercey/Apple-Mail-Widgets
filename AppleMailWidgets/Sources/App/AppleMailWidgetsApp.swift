@@ -55,7 +55,7 @@ final class MailModel: ObservableObject {
             case .success(let next):
                 storageError = nil
                 snapshot = next ?? SnapshotStore.load()
-                if next != nil { WidgetCenter.shared.reloadTimelines(ofKind: "UnreadMailWidget") }
+                if next != nil { WidgetCenter.shared.reloadTimelines(ofKind: "AppleMailWidgetsWidget") }
             case .failure(let error):
                 storageError = "The widget cache could not be saved: \(error.localizedDescription)"
             }
@@ -82,7 +82,7 @@ struct ContentView: View {
             HStack(spacing: 12) {
                 Image(systemName: "envelope.fill").font(.system(size: 32)).foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Mail Widgets").font(.title.bold())
+                    Text("AppleMailWidgets").font(.title.bold())
                     Text("Apple Mail on your desktop").foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -134,7 +134,7 @@ struct ContentView: View {
             GroupBox("Add a widget") {
                 VStack(alignment: .leading, spacing: 10) {
                     instruction(1, "Control-click the desktop and choose **Edit Widgets**.")
-                    instruction(2, "Find **Mail Widgets**, choose a size, and add a **Mail** widget.")
+                    instruction(2, "Find **AppleMailWidgets**, choose a size, and add a **Mail** widget.")
                     instruction(3, "Control-click your widget and choose **Edit “Mail”**.")
                     instruction(4, "Choose one or more inboxes. Leave the selection empty for all inboxes.")
                     instruction(5, "Keep **Only unread** on for unread messages, or turn it off to show all recent mail.")

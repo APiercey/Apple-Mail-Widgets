@@ -61,7 +61,7 @@ final class SettingsAppDelegate: NSObject, NSApplicationDelegate {
         if window == nil {
             let controller = NSHostingController(rootView: ContentView(model: model))
             let newWindow = NSWindow(contentViewController: controller)
-            newWindow.title = "Mail Widgets"
+            newWindow.title = "AppleMailWidgets"
             newWindow.styleMask = [.titled, .closable, .miniaturizable]
             newWindow.isReleasedWhenClosed = false
             newWindow.center()
@@ -81,8 +81,8 @@ enum SettingsApplication {
         app.delegate = delegate
         let menu = NSMenu()
         let appItem = NSMenuItem()
-        let appMenu = NSMenu(title: "Mail Widgets")
-        appMenu.addItem(withTitle: "Quit Mail Widgets", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let appMenu = NSMenu(title: "AppleMailWidgets")
+        appMenu.addItem(withTitle: "Quit AppleMailWidgets", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
         menu.addItem(appItem)
         let windowItem = NSMenuItem()

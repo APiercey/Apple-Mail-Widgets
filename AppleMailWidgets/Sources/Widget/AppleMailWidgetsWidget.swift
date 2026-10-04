@@ -71,7 +71,7 @@ struct MailWidgetView: View {
                 }.font(.caption2).foregroundStyle(.secondary)
         }
         .containerBackground(.fill.tertiary, for: .widget)
-        .widgetURL(URL(string: entry.snapshot.updatedAt == nil ? "unreadmail://settings" : "unreadmail://open-mail"))
+        .widgetURL(URL(string: entry.snapshot.updatedAt == nil ? "applemailwidgets://settings" : "applemailwidgets://open-mail"))
     }
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -108,8 +108,8 @@ struct MailWidgetView: View {
 
 }
 @main
-struct UnreadMailWidget: Widget {
-    let kind = "UnreadMailWidget"
+struct AppleMailWidgetsWidget: Widget {
+    let kind = "AppleMailWidgetsWidget"
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: MailConfiguration.self, provider: MailProvider()) {
             MailWidgetView(entry: $0)

@@ -16,7 +16,7 @@ enum MailReader {
             do {
                 let result = try invoke(arguments: [inbox.id], timeoutSeconds: 20)
                 guard result.status == "ready", var loaded = result.inboxes?.first else {
-                    throw NSError(domain: "UnreadMail", code: 2,
+                    throw NSError(domain: "AppleMailWidgets", code: 2,
                                   userInfo: [NSLocalizedDescriptionKey: result.detail])
                 }
                 loaded.updatedAt = .now
@@ -34,7 +34,7 @@ enum MailReader {
 
     private static func invoke(arguments: [String], timeoutSeconds: Double) throws -> ReaderResult {
         guard let script = Bundle.main.url(forResource: "ReadMail", withExtension: "js") else {
-            throw NSError(domain: "UnreadMail", code: 1, userInfo: [NSLocalizedDescriptionKey: "Mail reader is missing."])
+            throw NSError(domain: "AppleMailWidgets", code: 1, userInfo: [NSLocalizedDescriptionKey: "Mail reader is missing."])
         }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
@@ -52,9 +52,9 @@ enum MailReader {
         if process.terminationStatus != 0 {
             let reason = String(data: errorData, encoding: .utf8) ?? ""
             if reason.contains("1743") || reason.contains("not authorized") || reason.contains("Not authorized") {
-                return ReaderResult(status: "permissionRequired", detail: "Allow Mail Widgets to control Mail in System Settings → Privacy & Security → Automation.")
+                return ReaderResult(status: "permissionRequired", detail: "Allow AppleMailWidgets to control Mail in System Settings → Privacy & Security → Automation.")
             }
-            throw NSError(domain: "UnreadMail", code: Int(process.terminationStatus),
+            throw NSError(domain: "AppleMailWidgets", code: Int(process.terminationStatus),
                 userInfo: [NSLocalizedDescriptionKey: reason.isEmpty ? "Mail took too long to respond. Try again." : "Mail could not be read. \(reason.prefix(250))"])
         }
         let decoder = JSONDecoder()

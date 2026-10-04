@@ -20,7 +20,7 @@
 		"000000000000000000000003" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/App/UnreadMailApp.swift";
+			"path" = "Sources/App/AppleMailWidgetsApp.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000004" = {
@@ -56,7 +56,7 @@
 		"000000000000000000000009" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/Widget/UnreadMailWidget.swift";
+			"path" = "Sources/Widget/AppleMailWidgetsWidget.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"00000000000000000000000A" = {
@@ -74,13 +74,13 @@
 		"00000000000000000000000C" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
-			"path" = "Mail Widgets.app";
+			"path" = "AppleMailWidgets.app";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
 		"00000000000000000000000D" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.app-extension";
-			"path" = "UnreadMailWidget.appex";
+			"path" = "AppleMailWidgetsWidget.appex";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
 		"00000000000000000000000E" = {
@@ -109,8 +109,8 @@
 				"CURRENT_PROJECT_VERSION" = "1";
 				"MARKETING_VERSION" = "1.0";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
-				"PRODUCT_NAME" = "UnreadMailWidget";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "local.alexbp.UnreadMail.Widget";
+				"PRODUCT_NAME" = "AppleMailWidgetsWidget";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.applemailwidgets.AppleMailWidgets.Widget";
 				"INFOPLIST_FILE" = "Config/Widget-Info.plist";
 				"CODE_SIGN_ENTITLEMENTS" = "Config/Widget.entitlements";
 				"APPLICATION_EXTENSION_API_ONLY" = "YES";
@@ -135,8 +135,8 @@
 				"CURRENT_PROJECT_VERSION" = "1";
 				"MARKETING_VERSION" = "1.0";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
-				"PRODUCT_NAME" = "UnreadMailWidget";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "local.alexbp.UnreadMail.Widget";
+				"PRODUCT_NAME" = "AppleMailWidgetsWidget";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.applemailwidgets.AppleMailWidgets.Widget";
 				"INFOPLIST_FILE" = "Config/Widget-Info.plist";
 				"CODE_SIGN_ENTITLEMENTS" = "Config/Widget.entitlements";
 				"APPLICATION_EXTENSION_API_ONLY" = "YES";
@@ -182,8 +182,8 @@
 			"buildPhases" = ("000000000000000000000016", "000000000000000000000017");
 			"buildRules" = ();
 			"dependencies" = ();
-			"name" = "UnreadMailWidget";
-			"productName" = "UnreadMailWidget";
+			"name" = "AppleMailWidgetsWidget";
+			"productName" = "AppleMailWidgetsWidget";
 			"productReference" = "00000000000000000000000D";
 			"productType" = "com.apple.product-type.app-extension";
 		};
@@ -222,8 +222,8 @@
 				"CURRENT_PROJECT_VERSION" = "1";
 				"MARKETING_VERSION" = "1.0";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
-				"PRODUCT_NAME" = "Mail Widgets";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "local.alexbp.UnreadMail";
+				"PRODUCT_NAME" = "AppleMailWidgets";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.applemailwidgets.AppleMailWidgets";
 				"INFOPLIST_FILE" = "Config/App-Info.plist";
 				"CODE_SIGN_ENTITLEMENTS" = "Config/App.entitlements";
 				"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/../Frameworks";
@@ -245,8 +245,8 @@
 				"CURRENT_PROJECT_VERSION" = "1";
 				"MARKETING_VERSION" = "1.0";
 				"SWIFT_EMIT_LOC_STRINGS" = "NO";
-				"PRODUCT_NAME" = "Mail Widgets";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "local.alexbp.UnreadMail";
+				"PRODUCT_NAME" = "AppleMailWidgets";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.applemailwidgets.AppleMailWidgets";
 				"INFOPLIST_FILE" = "Config/App-Info.plist";
 				"CODE_SIGN_ENTITLEMENTS" = "Config/App.entitlements";
 				"LD_RUNPATH_SEARCH_PATHS" = "$(inherited) @executable_path/../Frameworks";
@@ -319,8 +319,8 @@
 			"buildPhases" = ("000000000000000000000027", "000000000000000000000029", "00000000000000000000002A", "00000000000000000000001B");
 			"buildRules" = ();
 			"dependencies" = ("000000000000000000000019");
-			"name" = "UnreadMail";
-			"productName" = "Mail Widgets";
+			"name" = "AppleMailWidgets";
+			"productName" = "AppleMailWidgets";
 			"productReference" = "00000000000000000000000C";
 			"productType" = "com.apple.product-type.application";
 		};

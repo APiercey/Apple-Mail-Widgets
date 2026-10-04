@@ -4,7 +4,7 @@ import WidgetKit
 
 @MainActor
 enum BackgroundRefresh {
-    static let label = "local.alexbp.UnreadMail.Refresh"
+    static let label = "com.applemailwidgets.AppleMailWidgets.Refresh"
     static var plistURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/LaunchAgents/\(label).plist")
@@ -46,7 +46,7 @@ enum BackgroundRefresh {
         process.waitUntilExit()
         let status = process.terminationStatus
         if status != 0 && !(allowMissing && status == 113) {
-            throw NSError(domain: "MailWidgets.BackgroundRefresh", code: Int(status), userInfo: [
+            throw NSError(domain: "AppleMailWidgets.BackgroundRefresh", code: Int(status), userInfo: [
                 NSLocalizedDescriptionKey: String(data: data, encoding: .utf8) ?? "Background refresh could not be configured."
             ])
         }
@@ -64,7 +64,7 @@ enum BackgroundRefresh {
                 "StartInterval": 60,
                 "ProcessType": "Background",
                 "LimitLoadToSessionType": "Aqua",
-                "AssociatedBundleIdentifiers": ["local.alexbp.UnreadMail"]
+                "AssociatedBundleIdentifiers": ["com.applemailwidgets.AppleMailWidgets"]
             ]
             try FileManager.default.createDirectory(at: plistURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             let data = try PropertyListSerialization.data(fromPropertyList: configuration, format: .xml, options: 0)
@@ -84,7 +84,7 @@ enum BackgroundRefresh {
         guard UserDefaults.standard.bool(forKey: "connected") else { return 0 }
         do {
             if let snapshot = try MailRefresh.collect() {
-                WidgetCenter.shared.reloadTimelines(ofKind: "UnreadMailWidget")
+                WidgetCenter.shared.reloadTimelines(ofKind: "AppleMailWidgetsWidget")
                 // Give the WidgetCenter IPC request time to leave this short-lived process.
                 RunLoop.current.run(until: Date().addingTimeInterval(1))
                 print("Background refresh: \(snapshot.status)")
@@ -98,7 +98,7 @@ enum BackgroundRefresh {
 }
 
 @main
-struct MailWidgetsMain {
+struct AppleMailWidgetsMain {
     @MainActor static func main() {
         let arguments = CommandLine.arguments
         if arguments.contains("--refresh-agent") || arguments.contains("--enable-background") || arguments.contains("--disable-background") || arguments.contains("--background-status") {

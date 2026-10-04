@@ -2,6 +2,18 @@
 
 Tested locally on macOS 26.7.1, Apple Silicon.
 
+## AppleMailWidgets project rename
+
+- Final identity change: host `com.applemailwidgets.AppleMailWidgets`, extension `.Widget`, agent `.Refresh`, widget kind `AppleMailWidgetsWidget`, URL scheme `applemailwidgets`, and cache directory `Application Support/AppleMailWidgets`.
+- Clean rebuild, signature verification, snapshot/filtering tests, collector tests, and routing tests passed. Scanned project text and ZIP entries for former product names and personal identifier prefixes: no matches.
+- Disabled the previous background service, replaced the installed bundle, and enabled the new service. Confirmed the extension is registered under its new identifier. Existing desktop widgets must be recreated and Mail access granted for the new identity.
+- Live collection under the new identity is pending the user's connection/permission step. UI automation could inventory the running new identity but could not bind to it after the identity change; no fresh setup screenshot was verified in this pass.
+
+- Renamed the project directory, Xcode project and targets, Swift entry-point files, app/extension executables, display names, and ZIP to AppleMailWidgets naming. Widget display title remains Mail.
+- All current bundle/service identifiers, widget kind, cache paths, and URL registration use AppleMailWidgets. There is no product-identity compatibility layer; the previous development identity is intentionally replaced.
+- Built and signature-verified the renamed app and extension, inspected the ZIP's names and absence of mail cache, and installed at AppleMailWidgets.app.
+- Verified the settings window and menu display AppleMailWidgets, background refresh stays enabled, and the LaunchAgent points to the renamed executable. The earlier app bundle is no longer installed.
+
 ## Multiple accounts during initial sync
 
 - Diagnosed a stale one-account snapshot with a reader timeout. Apple Mail exposed both Work and Personal; a full filtered unread count alone took about 30 seconds on Personal.
@@ -14,7 +26,7 @@ Tested locally on macOS 26.7.1, Apple Silicon.
 
 - Built the companion app and sandboxed WidgetKit extension with the installed Swift command-line toolchain.
 - Verified the installed app and embedded extension with `codesign --verify --deep --strict`.
-- Registered the extension with PlugInKit and verified it appears as **Mail Widgets** in the native macOS widget gallery.
+- Registered the extension with PlugInKit and verified it appears as **AppleMailWidgets** in the native macOS widget gallery.
 - Connected the installed app to the user's live Apple Mail inbox: 415 unread messages, exactly ten displayed, descending received dates.
 - Inspected the companion app's live list through macOS accessibility.
 - Added the **Large** widget to the desktop and visually inspected the actual WidgetKit-rendered result. All ten rows, the header, total count, and update timestamp fit inside the rounded system background.
@@ -25,7 +37,7 @@ Tested locally on macOS 26.7.1, Apple Silicon.
 
 ## Configuration and layout update
 
-- Built and installed the renamed **Mail Widgets** app, retaining bundle identifiers and the URL scheme to preserve existing widget instances and permission grants.
+- Built and installed the renamed **AppleMailWidgets** app, with the new product name.
 - Verified the live native widget shows **Mail**, **415 unread**, inbox scope, and the updated system-styled layout. Inspected both the large single-line layout and the extra-large two-column layout. Adjusted footer allocation to retain system content margins.
 - Live reader discovered one configured account inbox and returned both its ten newest unread messages and ten newest messages overall; the latter included two read messages.
 - Extended fixture tests passed for independent widget selections, multiple merged inboxes, global newest-first top ten, unread/all switching, scoped unread counts, missing/empty inboxes, v1 cache compatibility, and opening cached read messages.
@@ -39,7 +51,7 @@ Xcode 27 is installed, but `xcodebuild` is blocked by its unaccepted license. No
 
 A command-line WidgetKit build must link with `-e _NSExtensionMain`. Without this, it registers but exits immediately when the gallery queries it. The local build script includes the corrected entry point.
 
-The local build assigns a fresh bundle build number, so macOS can distinguish updates. The installed build resides at `~/Applications/Mail Widgets.app`.
+The local build assigns a fresh bundle build number, so macOS can distinguish updates. The installed build resides at `~/Applications/AppleMailWidgets.app`.
 
 ## Limits of this verification
 
