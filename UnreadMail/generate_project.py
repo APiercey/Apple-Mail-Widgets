@@ -9,14 +9,15 @@ def obj(isa, **values):
 def file(path, kind): return obj('PBXFileReference', lastKnownFileType=kind, path=path, sourceTree='SOURCE_ROOT')
 def build(ref, **extra): return obj('PBXBuildFile', fileRef=ref, **extra)
 shared = file('Sources/Shared/Snapshot.swift', 'sourcecode.swift')
-app_sources = [file('Sources/App/'+p, 'sourcecode.swift') for p in ['UnreadMailApp.swift','MailReader.swift','MailRefresh.swift','BackgroundRefresh.swift']]
+mail_link = file('Sources/Shared/MailLink.swift', 'sourcecode.swift')
+app_sources = [file('Sources/App/'+p, 'sourcecode.swift') for p in ['UnreadMailApp.swift','MailReader.swift','MailRefresh.swift','AgentStatus.swift','BackgroundRefresh.swift','SettingsApplication.swift']]
 widget_source = file('Sources/Widget/UnreadMailWidget.swift', 'sourcecode.swift')
 widget_config = file('Sources/Widget/MailConfiguration.swift', 'sourcecode.swift')
 script = file('Sources/App/ReadMail.js','sourcecode.javascript')
 app_product = obj('PBXFileReference', explicitFileType='wrapper.application', path='Mail Widgets.app', sourceTree='BUILT_PRODUCTS_DIR')
 widget_product = obj('PBXFileReference', explicitFileType='wrapper.app-extension', path='UnreadMailWidget.appex', sourceTree='BUILT_PRODUCTS_DIR')
 products = obj('PBXGroup', children=[app_product, widget_product], name='Products', sourceTree='<group>')
-main_group = obj('PBXGroup', children=[shared,*app_sources,widget_source,widget_config,script,products], sourceTree='<group>')
+main_group = obj('PBXGroup', children=[shared,mail_link,*app_sources,widget_source,widget_config,script,products], sourceTree='<group>')
 def configs(settings):
     ids = [obj('XCBuildConfiguration', name=name, buildSettings={**settings,'SWIFT_OPTIMIZATION_LEVEL':'-Onone' if name=='Debug' else '-O'}) for name in ['Debug','Release']]
     return obj('XCConfigurationList', buildConfigurations=ids, defaultConfigurationIsVisible=0, defaultConfigurationName='Debug')
@@ -27,7 +28,7 @@ def phase(kind, files): return obj(kind, buildActionMask=2147483647, files=files
 widget_target = obj('PBXNativeTarget', buildConfigurationList=configs(widget_settings), buildPhases=[phase('PBXSourcesBuildPhase',[build(shared),build(widget_config),build(widget_source)]),phase('PBXFrameworksBuildPhase',[])], buildRules=[], dependencies=[], name='UnreadMailWidget', productName='UnreadMailWidget', productReference=widget_product, productType='com.apple.product-type.app-extension')
 dep = obj('PBXTargetDependency', target=widget_target)
 embed = obj('PBXCopyFilesBuildPhase', buildActionMask=2147483647, dstPath='',dstSubfolderSpec=13, files=[build(widget_product,settings={'ATTRIBUTES':['RemoveHeadersOnCopy']})], name='Embed App Extensions',runOnlyForDeploymentPostprocessing=0)
-app_target = obj('PBXNativeTarget',buildConfigurationList=configs(app_settings),buildPhases=[phase('PBXSourcesBuildPhase',[build(shared),*[build(f) for f in app_sources]]),phase('PBXResourcesBuildPhase',[build(script)]),phase('PBXFrameworksBuildPhase',[]),embed],buildRules=[],dependencies=[dep],name='UnreadMail',productName='Mail Widgets',productReference=app_product,productType='com.apple.product-type.application')
+app_target = obj('PBXNativeTarget',buildConfigurationList=configs(app_settings),buildPhases=[phase('PBXSourcesBuildPhase',[build(shared),build(mail_link),*[build(f) for f in app_sources]]),phase('PBXResourcesBuildPhase',[build(script)]),phase('PBXFrameworksBuildPhase',[]),embed],buildRules=[],dependencies=[dep],name='UnreadMail',productName='Mail Widgets',productReference=app_product,productType='com.apple.product-type.application')
 project = obj('PBXProject',attributes={'BuildIndependentTargetsInParallel':'YES','LastUpgradeCheck':'2700'},buildConfigurationList=configs({}),compatibilityVersion='Xcode 14.0',developmentRegion='en',hasScannedForEncodings=0,knownRegions=['en','Base'],mainGroup=main_group,productRefGroup=products,projectDirPath='',projectRoot='',targets=[app_target,widget_target])
 def serialize(value, depth=0):
     if isinstance(value,dict): return '{\n'+''.join('\t'*(depth+1)+json.dumps(str(k))+' = '+serialize(v,depth+1)+';\n' for k,v in value.items())+'\t'*depth+'}'

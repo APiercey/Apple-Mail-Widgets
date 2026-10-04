@@ -10,10 +10,11 @@ A local macOS app and native WidgetKit extension for Apple Mail. Uses SwiftUI, S
 - Medium widget: three newest messages, with tight sender/subject pairs and additional separation between messages.
 - Sender, subject, scoped “x unread” count, and last successful update time. Medium and extra-large layouts also show received dates.
 - Native SwiftUI/App Intents configuration through **Edit “Mail”**.
-- Click a message to open it in Apple Mail.
+- Click a message to open it in Apple Mail. Widget URL launches are forwarded without creating the settings window; clicking the widget background opens Mail.
+- Message links carry the RFC Message-ID, so they remain usable after the top-ten cache changes. Old numeric-ID links retain a cache-based fallback.
 - Optional launchd background refresh: a short-lived per-user LaunchAgent runs approximately once a minute, even with the visible app quit.
 - Without background refresh, the companion app checks once a minute while running and after wake.
-- Separate **Refresh in background** and **Open app at login** switches, plus menu-bar Refresh and Quit commands.
+- A compact settings app with connection status, last check time, manual refresh, and a **Refresh in background** switch. No menu-bar item or message list in the app.
 - Read-only collection: no body downloads, read-status writes, sending, or deletion.
 - Visible setup/error/cached states. macOS controls the actual widget refresh schedule.
 
@@ -39,13 +40,29 @@ Output: `build/local/Mail Widgets.app`. This is locally ad-hoc signed, not notar
 
 ## Install and use
 
-Copy the app to `~/Applications`, launch it, click **Connect Apple Mail**, and allow the requested Automation access to Mail. Enable **Refresh in background** to keep collection running after quitting the app. If macOS requests approval, enable Mail Widgets under **System Settings → General → Login Items & Extensions**. Apple Mail must remain running. With background refresh off, keep the companion app running; closing its window keeps the menu-bar app alive.
+Copy the app to `~/Applications` or `/Applications`, launch it, click **Connect Apple Mail**, and allow the requested Automation access to Mail. Enable **Refresh in background** to keep collection running after quitting the app. If macOS requests approval, enable Mail Widgets under **System Settings → General → Login Items & Extensions**. Apple Mail must remain running. With background refresh off, collection runs only while the companion app is running.
 
 Control-click the desktop, choose **Edit Widgets**, search **Mail Widgets**, and add **Large** for all ten messages. Control-click each widget and choose **Edit “Mail”** to select inboxes and set **Only unread**. Add more instances to keep different selections side by side.
 
+## Package and update
+
+`./package-local.sh` builds `dist/Mail Widgets.zip`. The ZIP contains one app bundle, including the native widget extension, mail-reading script, and background collector code. It contains no mail cache or user settings. Move the extracted app to Applications, launch it, connect Mail, and enable background refresh. The app creates its per-user launchd registration using its own installed path; no separate helper download or shell setup is required.
+
+For local development, run `./install-local.sh` after building (or pass `--no-open`). It preserves whether background refresh was requested, stops the collector and old widget executable, replaces the bundle atomically, refreshes LaunchServices/PlugInKit registration, and restores background refresh. Stopping the old extension is essential: otherwise WidgetKit can reject timelines with a bundle-version mismatch after a rebuild.
+
+If the installed app is moved, its settings show **Repair** when the agent points at the previous path. The background switch reflects the actual loaded launchd job and current executable path, rather than only the existence of a plist. The legacy Service Management status API can report `notFound` even for a working local agent; it is used only to identify pending approval when the job is absent.
+
+The ZIP is a local Apple Silicon ad-hoc-signed build. Public distribution still needs a stable Developer ID signature, notarization, and an appropriate distribution design for cache sharing (see below). An Intel or universal build is not included.
+
+### Arrival-triggered updates
+
+Apple Mail supports an AppleScript action on incoming-message rules. Such a rule could request immediate collection when new mail arrives. It is not configured by this build; periodic collection also catches changes such as read status and deletion. Even an arrival-triggered collection cannot guarantee an immediate WidgetKit redraw.
+
 ## Data and permissions
 
-The host uses JavaScript for Automation (`osascript`) to read Mail's inbox metadata. It needs Automation access to Mail, not Full Disk Access. Mail must be running and syncing to receive new messages. Junk and deleted messages are excluded.
+The host uses JavaScript for Automation (`osascript`) to read Mail's inbox metadata. It needs Automation access to Mail, not Full Disk Access. Mail must be running and syncing to receive new messages. Junk and deleted messages are excluded from message rows; unread totals use Mail's reported inbox counts.
+
+Account discovery runs separately from message loading. Each enabled account remains selectable even if its inbox is still loading. Message reads have a 20-second timeout per inbox and search progressively wider date ranges (week, 90 days, year, then full history) until ten matching headers are found. A slow inbox preserves its previous messages while other inboxes update. New inboxes with no successful read show a pending state, and incomplete combined unread totals display a dash. If Mail itself stops responding to account discovery, the existing cache is retained until a later retry succeeds.
 
 For this personal ad-hoc build, the unsandboxed host publishes an atomic, user-readable-only snapshot in the sandboxed widget's own container:
 
@@ -97,4 +114,13 @@ Snapshot tests cover newest-first ordering, the ten-row limit, independent and c
 
 ## Remove
 
-Quit Mail Widgets and remove the widget through its context menu. Disable **Refresh in background** and **Open app at login** in the app before moving the app to Trash. Remove the widget's cache directory above if you also want to discard the saved headers.
+Quit Mail Widgets and remove the widget through its context menu. Disable **Refresh in background** before moving the app to Trash. Remove the widget's cache directory above if you also want to discard the saved headers.
+
+## Link-routing tests
+
+```sh
+DEVELOPER_DIR=/Library/Developer/CommandLineTools xcrun swiftc Sources/Shared/Snapshot.swift Sources/Shared/MailLink.swift Tests/MailLinkTests.swift -o /tmp/mail-link-tests
+/tmp/mail-link-tests
+```
+
+The AppKit launch delegate handles URL events before constructing any settings UI. Normal app launches still open settings. A widget-only launch forwards the message URL to Apple Mail and exits; an already-open settings window is left intact.

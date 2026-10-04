@@ -21,11 +21,27 @@ enum MailRefresh {
             let value = try read()
             next.status = value.status
             next.detail = value.detail
-            if value.status == "ready" {
-                next.inboxes = value.inboxes
-                next.messages = value.messages ?? []
-                next.unreadCount = value.unreadCount ?? 0
-                next.updatedAt = .now
+            if value.status == "ready" || value.status == "partial" {
+                if let discovered = value.inboxes, !discovered.isEmpty {
+                    let previous = next.inboxes ?? []
+                    let previousUpdatedAt = next.updatedAt
+                    next.inboxes = discovered.map { inbox in
+                        guard inbox.readError != nil,
+                              var cached = previous.first(where: { $0.id == inbox.id }) else { return inbox }
+                        cached.name = inbox.name
+                        cached.readError = inbox.readError
+                        if cached.updatedAt == nil { cached.updatedAt = previousUpdatedAt }
+                        return cached
+                    }
+                    next.messages = MailSnapshot.newest(next.inboxes!.flatMap(\.unreadMessages))
+                    next.unreadCount = next.inboxes!.reduce(0) { $0 + $1.unreadCount }
+                    if discovered.contains(where: { $0.readError == nil }) { next.updatedAt = .now }
+                } else {
+                    next.inboxes = value.inboxes
+                    next.messages = value.messages ?? []
+                    next.unreadCount = value.unreadCount ?? 0
+                    next.updatedAt = .now
+                }
             }
         } catch {
             next.status = "error"

@@ -10,18 +10,41 @@ struct ReaderResult: Decodable {
 
 enum MailReader {
     static func read() throws -> ReaderResult {
+        let catalog = try invoke(arguments: ["catalog"], timeoutSeconds: 10)
+        guard catalog.status == "catalog", let discovered = catalog.inboxes else { return catalog }
+        let inboxes = discovered.map { inbox -> InboxSnapshot in
+            do {
+                let result = try invoke(arguments: [inbox.id], timeoutSeconds: 20)
+                guard result.status == "ready", var loaded = result.inboxes?.first else {
+                    throw NSError(domain: "UnreadMail", code: 2,
+                                  userInfo: [NSLocalizedDescriptionKey: result.detail])
+                }
+                loaded.updatedAt = .now
+                return loaded
+            } catch {
+                var pending = inbox
+                pending.readError = "Apple Mail has not finished loading this inbox, or took too long to respond. Retrying automatically."
+                return pending
+            }
+        }
+        let pending = inboxes.filter { $0.readError != nil }
+        return ReaderResult(inboxes: inboxes, status: pending.isEmpty ? "ready" : "partial",
+                            detail: pending.isEmpty ? "" : "Some inboxes could not be checked yet. Last available messages are shown; new inboxes remain selectable. Retrying automatically.")
+    }
+
+    private static func invoke(arguments: [String], timeoutSeconds: Double) throws -> ReaderResult {
         guard let script = Bundle.main.url(forResource: "ReadMail", withExtension: "js") else {
             throw NSError(domain: "UnreadMail", code: 1, userInfo: [NSLocalizedDescriptionKey: "Mail reader is missing."])
         }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-l", "JavaScript", script.path]
+        process.arguments = ["-l", "JavaScript", script.path] + arguments
         let output = Pipe(), errors = Pipe()
         process.standardOutput = output
         process.standardError = errors
         try process.run()
         let timeout = DispatchWorkItem { if process.isRunning { process.terminate() } }
-        DispatchQueue.global().asyncAfter(deadline: .now() + 45, execute: timeout)
+        DispatchQueue.global().asyncAfter(deadline: .now() + timeoutSeconds, execute: timeout)
         let data = output.fileHandleForReading.readDataToEndOfFile()
         let errorData = errors.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()

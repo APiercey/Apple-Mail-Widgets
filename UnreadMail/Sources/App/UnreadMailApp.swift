@@ -8,9 +8,8 @@ final class MailModel: ObservableObject {
     @Published var snapshot = SnapshotStore.load()
     @Published var refreshing = false
     @Published var storageError: String?
-    @Published var launchAtLogin = SMAppService.mainApp.status == .enabled
-    @Published var backgroundRefresh = BackgroundRefresh.requested
-    @Published var backgroundStatus = BackgroundRefresh.statusText
+    @Published var agentStatus = BackgroundRefresh.inspect()
+    var backgroundRefresh: Bool { agentStatus.enabled }
     private var timer: Timer?
     private var cacheTimer: Timer?
 
@@ -19,7 +18,7 @@ final class MailModel: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.updateBackgroundStatus()
-                if !BackgroundRefresh.enabled { self.refresh() }
+                if !self.agentStatus.enabled { self.refresh() }
             }
         }
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification,
@@ -64,10 +63,8 @@ final class MailModel: ObservableObject {
         }
     }
     func updateBackgroundStatus() {
-        let requested = BackgroundRefresh.requested
-        let text = BackgroundRefresh.statusText
-        if backgroundRefresh != requested { backgroundRefresh = requested }
-        if backgroundStatus != text { backgroundStatus = text }
+        let status = BackgroundRefresh.inspect()
+        if status != agentStatus { agentStatus = status }
     }
     func setBackgroundRefresh(_ enabled: Bool) {
         do {
@@ -76,126 +73,85 @@ final class MailModel: ObservableObject {
         } catch { storageError = error.localizedDescription }
         updateBackgroundStatus()
     }
-    func setLogin(_ enabled: Bool) {
-        do {
-            if enabled { try SMAppService.mainApp.register() }
-            else { try SMAppService.mainApp.unregister() }
-            launchAtLogin = SMAppService.mainApp.status == .enabled
-        } catch { storageError = error.localizedDescription }
-    }
-    func openMessage(_ item: MailItem) {
-        // RFC Message-ID is encoded as a URL component; no email text is executed as code.
-        let id = item.messageID.trimmingCharacters(in: CharacterSet(charactersIn: "<>"))
-        if !id.isEmpty,
-           let escaped = ("<" + id + ">").addingPercentEncoding(withAllowedCharacters: .alphanumerics),
-           let url = URL(string: "message://" + escaped) {
-            NSWorkspace.shared.open(url)
-        } else { NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/Mail.app")) }
-    }
-    func handle(_ url: URL) {
-        if url.host == "message",
-           let raw = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: {$0.name == "id"})?.value,
-           let id = Int(raw), let message = snapshot.allCachedMessages.first(where: {$0.id == id}) {
-            openMessage(message)
-        } else { NSApp.activate(ignoringOtherApps: true) }
-    }
 }
 
 struct ContentView: View {
     @ObservedObject var model: MailModel
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 14) {
-                Image(systemName: "envelope.badge.fill").font(.system(size: 35)).foregroundStyle(.tint)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Mail Widgets").font(.largeTitle.bold())
-                    Text("Your inbox, at a glance.").foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 12) {
+                Image(systemName: "envelope.fill").font(.system(size: 32)).foregroundStyle(.tint)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Mail Widgets").font(.title.bold())
+                    Text("Apple Mail on your desktop").foregroundStyle(.secondary)
                 }
                 Spacer()
-                if model.refreshing { ProgressView().controlSize(.small) }
-                Button("Refresh", systemImage: "arrow.clockwise") { model.refresh() }
-                    .disabled(model.refreshing || model.snapshot.status == "setup")
             }
             GroupBox {
-                HStack {
-                    Label(model.snapshot.status == "ready" ? "Connected to Apple Mail" : "Apple Mail connection",
-                          systemImage: model.snapshot.status == "ready" ? "checkmark.circle.fill" : "envelope")
-                    Spacer()
-                    Button(model.snapshot.updatedAt == nil ? "Connect Apple Mail" : "Open Mail") { model.connect() }
-                        .buttonStyle(.borderedProminent)
-                }.padding(6)
-                if !model.snapshot.detail.isEmpty {
-                    Text(model.snapshot.detail).font(.callout).foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading).padding(6)
-                }
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Label(model.snapshot.status == "ready" ? "Last mail check successful" : "Apple Mail connection",
+                              systemImage: model.snapshot.status == "ready" ? "checkmark.circle.fill" : "envelope")
+                        Spacer()
+                        Button(model.snapshot.updatedAt == nil ? "Connect Apple Mail" : "Open Mail") { model.connect() }
+                    }
+                    if !model.snapshot.detail.isEmpty {
+                        Text(model.snapshot.detail).font(.callout).foregroundStyle(.secondary)
+                    }
+                    Divider()
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Last checked").font(.caption).foregroundStyle(.secondary)
+                            if let date = model.snapshot.updatedAt {
+                                Text(date, format: .dateTime.hour().minute().second()).monospacedDigit()
+                            } else { Text("Not yet connected") }
+                        }
+                        Spacer()
+                        if model.refreshing { ProgressView().controlSize(.small) }
+                        Button("Refresh now", systemImage: "arrow.clockwise") { model.refresh() }
+                            .disabled(model.refreshing || model.snapshot.status == "setup")
+                    }
+                }.padding(8)
+            }
+            GroupBox {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Toggle("Refresh in background", isOn: Binding(get: { model.backgroundRefresh }, set: { model.setBackgroundRefresh($0) }))
+                        Spacer()
+                        if model.agentStatus.needsRepair {
+                            Button("Repair") { model.setBackgroundRefresh(true) }
+                        }
+                    }
+                    Text(model.agentStatus.description).font(.callout).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Keep Apple Mail running. macOS controls when widgets redraw.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }.padding(8)
             }
             if let error = model.storageError {
                 Label(error, systemImage: "exclamationmark.triangle").font(.callout).foregroundStyle(.orange)
             }
-            HStack {
-                Text("Newest unread").font(.headline)
-                Spacer()
-                if model.snapshot.updatedAt != nil {
-                    Text("\(model.snapshot.unreadCount) unread · showing \(model.snapshot.messages.count)")
-                        .font(.subheadline).foregroundStyle(.secondary)
+            GroupBox("Add a widget") {
+                VStack(alignment: .leading, spacing: 10) {
+                    instruction(1, "Control-click the desktop and choose **Edit Widgets**.")
+                    instruction(2, "Find **Mail Widgets**, choose a size, and add a **Mail** widget.")
+                    instruction(3, "Control-click your widget and choose **Edit “Mail”**.")
+                    instruction(4, "Choose one or more inboxes. Leave the selection empty for all inboxes.")
+                    instruction(5, "Keep **Only unread** on for unread messages, or turn it off to show all recent mail.")
                 }
+                .font(.callout)
+                .frame(maxWidth: .infinity, alignment: .leading).padding(8)
             }
-            List {
-                if model.snapshot.messages.isEmpty {
-                    ContentUnavailableView(model.snapshot.status == "ready" ? "All caught up" : "Your messages will appear here",
-                        systemImage: model.snapshot.status == "ready" ? "checkmark.circle" : "tray",
-                        description: Text(model.snapshot.status == "ready" ? "No unread messages in your inboxes." : "Connect Apple Mail to show your ten newest unread messages."))
-                }
-                ForEach(model.snapshot.messages) { message in
-                    Button { model.openMessage(message) } label: {
-                        HStack(alignment: .top, spacing: 10) {
-                            Circle().fill(.tint).frame(width: 6, height: 6).padding(.top, 6)
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(message.displaySender).fontWeight(.semibold).lineLimit(1)
-                                Text(message.displaySubject).foregroundStyle(.secondary).lineLimit(1)
-                            }
-                            Spacer()
-                            Text(message.receivedAt, style: .date).font(.caption).foregroundStyle(.secondary)
-                        }.padding(.vertical, 3).contentShape(Rectangle())
-                    }.buttonStyle(.plain)
-                }
-            }.listStyle(.inset).clipShape(RoundedRectangle(cornerRadius: 8))
-            GroupBox("Add your native widget") {
-                Text("Control-click the desktop → Edit Widgets → Mail Widgets. Choose Large for ten messages. Control-click each widget → Edit “Mail” to choose its inboxes and turn Only unread on or off.")
-                    .frame(maxWidth: .infinity, alignment: .leading).padding(6)
-            }
-            HStack {
-                Toggle("Open app at login", isOn: Binding(get: { model.launchAtLogin }, set: { model.setLogin($0) }))
-                Spacer()
-                if let date = model.snapshot.updatedAt {
-                    Text("Updated \(date.formatted(date: .omitted, time: .shortened))").foregroundStyle(.secondary)
-                }
-            }.font(.caption)
-            Toggle("Refresh in background", isOn: Binding(get: { model.backgroundRefresh }, set: { model.setBackgroundRefresh($0) }))
-                .font(.caption)
-            Text(model.backgroundStatus + " Apple Mail must be running. macOS schedules widget redraws.")
-                .font(.caption).foregroundStyle(.secondary)
-        }.padding(24).frame(minWidth: 540, idealWidth: 640, minHeight: 700, idealHeight: 820)
+        }.padding(24).frame(width: 540)
     }
-}
 
-struct UnreadMailApp: App {
-    @StateObject private var model = MailModel()
-    @Environment(\.openWindow) private var openWindow
-    var body: some Scene {
-        WindowGroup("Mail Widgets", id: "main") {
-            ContentView(model: model).onOpenURL { model.handle($0) }
-        }.defaultSize(width: 640, height: 820)
-        MenuBarExtra("Mail Widgets", systemImage: "envelope.badge") {
-            Text("\(model.snapshot.unreadCount) unread messages")
-            Button("Refresh now") { model.refresh() }.disabled(model.refreshing)
-            Toggle("Refresh in background", isOn: Binding(get: { model.backgroundRefresh }, set: { model.setBackgroundRefresh($0) }))
-            Button("Open Mail Widgets") {
-                NSApp.activate(ignoringOtherApps: true)
-                openWindow(id: "main")
-            }
-            Divider()
-            Button("Quit Mail Widgets") { NSApp.terminate(nil) }.keyboardShortcut("q")
+    private func instruction(_ number: Int, _ text: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text("\(number).")
+                .monospacedDigit().foregroundStyle(.secondary)
+                .frame(width: 18, alignment: .trailing)
+            Text(text).fixedSize(horizontal: false, vertical: true)
         }
+        .accessibilityElement(children: .combine)
     }
 }

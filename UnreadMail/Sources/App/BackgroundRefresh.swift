@@ -9,20 +9,29 @@ enum BackgroundRefresh {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/LaunchAgents/\(label).plist")
     }
-    static var status: SMAppService.Status {
-        guard FileManager.default.fileExists(atPath: plistURL.path) else { return .notRegistered }
-        return SMAppService.statusForLegacyPlist(at: plistURL)
+    static func inspect() -> AgentStatus {
+        let installed = FileManager.default.fileExists(atPath: plistURL.path)
+        guard installed else { return AgentStatus(installed: false, loaded: false, correctPath: false, approvalRequired: false) }
+        let data = try? Data(contentsOf: plistURL)
+        let plist = data.flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) } as? [String: Any]
+        let arguments = plist?["ProgramArguments"] as? [String]
+        let correctPath = arguments?.first == Bundle.main.executableURL?.path
+        let loaded = jobIsLoaded()
+        // Legacy-plist status can report notFound for an active local agent. launchd is authoritative.
+        let requiresApproval = !loaded && SMAppService.statusForLegacyPlist(at: plistURL) == .requiresApproval
+        return AgentStatus(installed: true, loaded: loaded, correctPath: correctPath, approvalRequired: requiresApproval)
     }
-    static var enabled: Bool { status == .enabled }
+    static var enabled: Bool { inspect().enabled }
     static var requested: Bool { FileManager.default.fileExists(atPath: plistURL.path) }
-    static var statusText: String {
-        switch status {
-        case .enabled: return "Background refresh enabled. You can quit Mail Widgets."
-        case .requiresApproval: return "Allow Mail Widgets in System Settings → General → Login Items & Extensions."
-        case .notRegistered: return "Background refresh is off. Keep Mail Widgets running to update widgets."
-        case .notFound: return "Background refresh needs to be re-enabled."
-        @unknown default: return "Background refresh status is unavailable."
-        }
+    static var statusText: String { inspect().description }
+    private static func jobIsLoaded() -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
+        process.arguments = ["print", "gui/\(getuid())/\(label)"]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        do { try process.run(); process.waitUntilExit(); return process.terminationStatus == 0 }
+        catch { return false }
     }
     @discardableResult
     private static func launchctl(_ arguments: [String], allowMissing: Bool = false) throws -> Int32 {
@@ -47,7 +56,7 @@ enum BackgroundRefresh {
         let domain = "gui/\(getuid())"
         if enabled {
             guard let executable = Bundle.main.executableURL else { return }
-            if requested { try launchctl(["bootout", "\(domain)/\(label)"], allowMissing: true) }
+            if jobIsLoaded() { try launchctl(["bootout", "\(domain)/\(label)"], allowMissing: true) }
             let configuration: [String: Any] = [
                 "Label": label,
                 "ProgramArguments": [executable.path, "--refresh-agent"],
@@ -105,7 +114,7 @@ struct MailWidgetsMain {
                 exit(1)
             }
         } else {
-            UnreadMailApp.main()
+            SettingsApplication.run()
         }
     }
 }

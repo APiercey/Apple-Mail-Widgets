@@ -19,7 +19,8 @@ struct MailItem: Codable, Identifiable, Equatable {
         // Retain the scheme and bundle identifiers so existing widgets keep working.
         url.scheme = "unreadmail"
         url.host = "message"
-        url.queryItems = [URLQueryItem(name: "id", value: String(id))]
+        url.queryItems = [URLQueryItem(name: "id", value: String(id)),
+                          URLQueryItem(name: "messageID", value: messageID)]
         return url.url!
     }
 }
@@ -30,6 +31,8 @@ struct InboxSnapshot: Codable, Identifiable, Equatable {
     var unreadCount: Int
     var unreadMessages: [MailItem]
     var recentMessages: [MailItem]
+    var updatedAt: Date? = nil
+    var readError: String? = nil
 }
 
 struct MailSnapshot: Codable, Equatable {
@@ -53,8 +56,10 @@ struct MailSnapshot: Codable, Equatable {
         var value = self
         value.messages = Self.newest(messages)
         value.inboxes = inboxes?.map {
-            InboxSnapshot(id: $0.id, name: $0.name, unreadCount: $0.unreadCount,
-                          unreadMessages: Self.newest($0.unreadMessages), recentMessages: Self.newest($0.recentMessages))
+            var inbox = $0
+            inbox.unreadMessages = Self.newest(inbox.unreadMessages)
+            inbox.recentMessages = Self.newest(inbox.recentMessages)
+            return inbox
         }
         return value
     }
@@ -66,6 +71,14 @@ struct MailSnapshot: Codable, Equatable {
         var result = self
         result.messages = Self.newest(chosen.flatMap { unreadOnly ? $0.unreadMessages : $0.recentMessages })
         result.unreadCount = chosen.reduce(0) { $0 + $1.unreadCount }
+        if status == "ready" || status == "partial" {
+            let pending = chosen.filter { $0.readError != nil }
+            result.status = pending.isEmpty ? "ready" : "partial"
+            result.detail = pending.first?.readError ?? ""
+            if chosen.contains(where: { $0.updatedAt != nil || $0.readError != nil }) {
+                result.updatedAt = chosen.compactMap(\.updatedAt).min()
+            }
+        }
         if !selected.isEmpty && chosen.count != selected.count {
             result.status = "inboxUnavailable"
             result.detail = "A selected inbox is unavailable. Edit this widget to update its inboxes."

@@ -39,7 +39,7 @@ struct MailWidgetView: View {
                     Image(systemName: "envelope.fill").foregroundStyle(.tint)
                     Text("Mail").font(.headline)
                     Spacer()
-                    Text(entry.snapshot.updatedAt == nil ? "— unread" : "\(entry.snapshot.unreadCount) unread")
+                    Text(entry.snapshot.updatedAt == nil || entry.snapshot.status == "partial" ? "— unread" : "\(entry.snapshot.unreadCount) unread")
                         .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
                 }
                 if entry.snapshot.updatedAt == nil || entry.snapshot.messages.isEmpty {
@@ -71,7 +71,7 @@ struct MailWidgetView: View {
                 }.font(.caption2).foregroundStyle(.secondary)
         }
         .containerBackground(.fill.tertiary, for: .widget)
-        .widgetURL(URL(string: "unreadmail://open"))
+        .widgetURL(URL(string: entry.snapshot.updatedAt == nil ? "unreadmail://settings" : "unreadmail://open-mail"))
     }
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 8) {

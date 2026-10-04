@@ -14,69 +14,87 @@
 		"000000000000000000000002" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/App/UnreadMailApp.swift";
+			"path" = "Sources/Shared/MailLink.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000003" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/App/MailReader.swift";
+			"path" = "Sources/App/UnreadMailApp.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000004" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/App/MailRefresh.swift";
+			"path" = "Sources/App/MailReader.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000005" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/App/BackgroundRefresh.swift";
+			"path" = "Sources/App/MailRefresh.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000006" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/Widget/UnreadMailWidget.swift";
+			"path" = "Sources/App/AgentStatus.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000007" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Sources/Widget/MailConfiguration.swift";
+			"path" = "Sources/App/BackgroundRefresh.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"000000000000000000000008" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/App/SettingsApplication.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"000000000000000000000009" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/Widget/UnreadMailWidget.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000000A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Sources/Widget/MailConfiguration.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"00000000000000000000000B" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.javascript";
 			"path" = "Sources/App/ReadMail.js";
 			"sourceTree" = "SOURCE_ROOT";
 		};
-		"000000000000000000000009" = {
+		"00000000000000000000000C" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
 			"path" = "Mail Widgets.app";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
-		"00000000000000000000000A" = {
+		"00000000000000000000000D" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.app-extension";
 			"path" = "UnreadMailWidget.appex";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
-		"00000000000000000000000B" = {
+		"00000000000000000000000E" = {
 			"isa" = "PBXGroup";
-			"children" = ("000000000000000000000009", "00000000000000000000000A");
+			"children" = ("00000000000000000000000C", "00000000000000000000000D");
 			"name" = "Products";
 			"sourceTree" = "<group>";
 		};
-		"00000000000000000000000C" = {
+		"00000000000000000000000F" = {
 			"isa" = "PBXGroup";
-			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "000000000000000000000004", "000000000000000000000005", "000000000000000000000006", "000000000000000000000007", "000000000000000000000008", "00000000000000000000000B");
+			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "000000000000000000000004", "000000000000000000000005", "000000000000000000000006", "000000000000000000000007", "000000000000000000000008", "000000000000000000000009", "00000000000000000000000A", "00000000000000000000000B", "00000000000000000000000E");
 			"sourceTree" = "<group>";
 		};
-		"00000000000000000000000D" = {
+		"000000000000000000000010" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Debug";
 			"buildSettings" = {
@@ -102,7 +120,7 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
 			};
 		};
-		"00000000000000000000000E" = {
+		"000000000000000000000011" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Release";
 			"buildSettings" = {
@@ -128,68 +146,68 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
 			};
 		};
-		"00000000000000000000000F" = {
+		"000000000000000000000012" = {
 			"isa" = "XCConfigurationList";
-			"buildConfigurations" = ("00000000000000000000000D", "00000000000000000000000E");
+			"buildConfigurations" = ("000000000000000000000010", "000000000000000000000011");
 			"defaultConfigurationIsVisible" = 0;
 			"defaultConfigurationName" = "Debug";
 		};
-		"000000000000000000000010" = {
+		"000000000000000000000013" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000001";
 		};
-		"000000000000000000000011" = {
+		"000000000000000000000014" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "000000000000000000000007";
+			"fileRef" = "00000000000000000000000A";
 		};
-		"000000000000000000000012" = {
+		"000000000000000000000015" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "000000000000000000000006";
+			"fileRef" = "000000000000000000000009";
 		};
-		"000000000000000000000013" = {
+		"000000000000000000000016" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = 2147483647;
-			"files" = ("000000000000000000000010", "000000000000000000000011", "000000000000000000000012");
+			"files" = ("000000000000000000000013", "000000000000000000000014", "000000000000000000000015");
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
-		"000000000000000000000014" = {
+		"000000000000000000000017" = {
 			"isa" = "PBXFrameworksBuildPhase";
 			"buildActionMask" = 2147483647;
 			"files" = ();
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
-		"000000000000000000000015" = {
+		"000000000000000000000018" = {
 			"isa" = "PBXNativeTarget";
-			"buildConfigurationList" = "00000000000000000000000F";
-			"buildPhases" = ("000000000000000000000013", "000000000000000000000014");
+			"buildConfigurationList" = "000000000000000000000012";
+			"buildPhases" = ("000000000000000000000016", "000000000000000000000017");
 			"buildRules" = ();
 			"dependencies" = ();
 			"name" = "UnreadMailWidget";
 			"productName" = "UnreadMailWidget";
-			"productReference" = "00000000000000000000000A";
+			"productReference" = "00000000000000000000000D";
 			"productType" = "com.apple.product-type.app-extension";
 		};
-		"000000000000000000000016" = {
+		"000000000000000000000019" = {
 			"isa" = "PBXTargetDependency";
-			"target" = "000000000000000000000015";
+			"target" = "000000000000000000000018";
 		};
-		"000000000000000000000017" = {
+		"00000000000000000000001A" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "00000000000000000000000A";
+			"fileRef" = "00000000000000000000000D";
 			"settings" = {
 				"ATTRIBUTES" = ("RemoveHeadersOnCopy");
 			};
 		};
-		"000000000000000000000018" = {
+		"00000000000000000000001B" = {
 			"isa" = "PBXCopyFilesBuildPhase";
 			"buildActionMask" = 2147483647;
 			"dstPath" = "";
 			"dstSubfolderSpec" = 13;
-			"files" = ("000000000000000000000017");
+			"files" = ("00000000000000000000001A");
 			"name" = "Embed App Extensions";
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
-		"000000000000000000000019" = {
+		"00000000000000000000001C" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Debug";
 			"buildSettings" = {
@@ -212,7 +230,7 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
 			};
 		};
-		"00000000000000000000001A" = {
+		"00000000000000000000001D" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Release";
 			"buildSettings" = {
@@ -235,102 +253,114 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
 			};
 		};
-		"00000000000000000000001B" = {
+		"00000000000000000000001E" = {
 			"isa" = "XCConfigurationList";
-			"buildConfigurations" = ("000000000000000000000019", "00000000000000000000001A");
+			"buildConfigurations" = ("00000000000000000000001C", "00000000000000000000001D");
 			"defaultConfigurationIsVisible" = 0;
 			"defaultConfigurationName" = "Debug";
 		};
-		"00000000000000000000001C" = {
+		"00000000000000000000001F" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000001";
 		};
-		"00000000000000000000001D" = {
+		"000000000000000000000020" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000002";
 		};
-		"00000000000000000000001E" = {
+		"000000000000000000000021" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000003";
 		};
-		"00000000000000000000001F" = {
+		"000000000000000000000022" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000004";
 		};
-		"000000000000000000000020" = {
+		"000000000000000000000023" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000005";
 		};
-		"000000000000000000000021" = {
-			"isa" = "PBXSourcesBuildPhase";
-			"buildActionMask" = 2147483647;
-			"files" = ("00000000000000000000001C", "00000000000000000000001D", "00000000000000000000001E", "00000000000000000000001F", "000000000000000000000020");
-			"runOnlyForDeploymentPostprocessing" = 0;
+		"000000000000000000000024" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "000000000000000000000006";
 		};
-		"000000000000000000000022" = {
+		"000000000000000000000025" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "000000000000000000000007";
+		};
+		"000000000000000000000026" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "000000000000000000000008";
 		};
-		"000000000000000000000023" = {
-			"isa" = "PBXResourcesBuildPhase";
+		"000000000000000000000027" = {
+			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = 2147483647;
-			"files" = ("000000000000000000000022");
+			"files" = ("00000000000000000000001F", "000000000000000000000020", "000000000000000000000021", "000000000000000000000022", "000000000000000000000023", "000000000000000000000024", "000000000000000000000025", "000000000000000000000026");
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
-		"000000000000000000000024" = {
+		"000000000000000000000028" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "00000000000000000000000B";
+		};
+		"000000000000000000000029" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = 2147483647;
+			"files" = ("000000000000000000000028");
+			"runOnlyForDeploymentPostprocessing" = 0;
+		};
+		"00000000000000000000002A" = {
 			"isa" = "PBXFrameworksBuildPhase";
 			"buildActionMask" = 2147483647;
 			"files" = ();
 			"runOnlyForDeploymentPostprocessing" = 0;
 		};
-		"000000000000000000000025" = {
+		"00000000000000000000002B" = {
 			"isa" = "PBXNativeTarget";
-			"buildConfigurationList" = "00000000000000000000001B";
-			"buildPhases" = ("000000000000000000000021", "000000000000000000000023", "000000000000000000000024", "000000000000000000000018");
+			"buildConfigurationList" = "00000000000000000000001E";
+			"buildPhases" = ("000000000000000000000027", "000000000000000000000029", "00000000000000000000002A", "00000000000000000000001B");
 			"buildRules" = ();
-			"dependencies" = ("000000000000000000000016");
+			"dependencies" = ("000000000000000000000019");
 			"name" = "UnreadMail";
 			"productName" = "Mail Widgets";
-			"productReference" = "000000000000000000000009";
+			"productReference" = "00000000000000000000000C";
 			"productType" = "com.apple.product-type.application";
 		};
-		"000000000000000000000026" = {
+		"00000000000000000000002C" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Debug";
 			"buildSettings" = {
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
 			};
 		};
-		"000000000000000000000027" = {
+		"00000000000000000000002D" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Release";
 			"buildSettings" = {
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
 			};
 		};
-		"000000000000000000000028" = {
+		"00000000000000000000002E" = {
 			"isa" = "XCConfigurationList";
-			"buildConfigurations" = ("000000000000000000000026", "000000000000000000000027");
+			"buildConfigurations" = ("00000000000000000000002C", "00000000000000000000002D");
 			"defaultConfigurationIsVisible" = 0;
 			"defaultConfigurationName" = "Debug";
 		};
-		"000000000000000000000029" = {
+		"00000000000000000000002F" = {
 			"isa" = "PBXProject";
 			"attributes" = {
 				"BuildIndependentTargetsInParallel" = "YES";
 				"LastUpgradeCheck" = "2700";
 			};
-			"buildConfigurationList" = "000000000000000000000028";
+			"buildConfigurationList" = "00000000000000000000002E";
 			"compatibilityVersion" = "Xcode 14.0";
 			"developmentRegion" = "en";
 			"hasScannedForEncodings" = 0;
 			"knownRegions" = ("en", "Base");
-			"mainGroup" = "00000000000000000000000C";
-			"productRefGroup" = "00000000000000000000000B";
+			"mainGroup" = "00000000000000000000000F";
+			"productRefGroup" = "00000000000000000000000E";
 			"projectDirPath" = "";
 			"projectRoot" = "";
-			"targets" = ("000000000000000000000025", "000000000000000000000015");
+			"targets" = ("00000000000000000000002B", "000000000000000000000018");
 		};
 	};
-	"rootObject" = "000000000000000000000029";
+	"rootObject" = "00000000000000000000002F";
 }

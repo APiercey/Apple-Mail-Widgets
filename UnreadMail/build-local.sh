@@ -12,7 +12,7 @@ xcrun swiftc -parse-as-library -swift-version 5 -target arm64-apple-macos14.0 -s
     -application-extension -Xlinker -e -Xlinker _NSExtensionMain -D WIDGET_EXTENSION Sources/Shared/Snapshot.swift Sources/Widget/MailConfiguration.swift Sources/Widget/UnreadMailWidget.swift \
     -o "$EXT/Contents/MacOS/UnreadMailWidget"
 xcrun swiftc -parse-as-library -swift-version 5 -target arm64-apple-macos14.0 -sdk "$SDK" \
-    Sources/Shared/Snapshot.swift Sources/App/MailReader.swift Sources/App/MailRefresh.swift Sources/App/BackgroundRefresh.swift Sources/App/UnreadMailApp.swift \
+    Sources/Shared/Snapshot.swift Sources/Shared/MailLink.swift Sources/App/MailReader.swift Sources/App/MailRefresh.swift Sources/App/AgentStatus.swift Sources/App/BackgroundRefresh.swift Sources/App/UnreadMailApp.swift Sources/App/SettingsApplication.swift \
     -o "$APP/Contents/MacOS/UnreadMail"
 xcrun swift Config/MakeIcon.swift "$PWD/build/AppIcon.iconset"
 xcrun iconutil -c icns "$PWD/build/AppIcon.iconset" -o "$APP/Contents/Resources/AppIcon.icns"

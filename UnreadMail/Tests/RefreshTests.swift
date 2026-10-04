@@ -36,8 +36,41 @@ import Darwin
             ReaderResult(inboxes: [], messages: [], unreadCount: 0, status: "ready", detail: "")
         }
         check(recovered?.status == "ready", "The lock is released between runs")
+        let checked = Date(timeIntervalSince1970: 1000)
+        let work = InboxSnapshot(id: "work", name: "Work", unreadCount: 7,
+                                 unreadMessages: [item], recentMessages: [item], updatedAt: checked)
+        _ = try MailRefresh.collect(at: path) {
+            ReaderResult(inboxes: [work], status: "ready", detail: "")
+        }
+        let pending = InboxSnapshot(id: "personal", name: "Personal", unreadCount: 0,
+                                    unreadMessages: [], recentMessages: [], readError: "Still loading")
+        let partial = try MailRefresh.collect(at: path) {
+            ReaderResult(inboxes: [work, pending], status: "partial", detail: "Still loading")
+        }!
+        check(partial.inboxes?.count == 2, "A new syncing inbox remains selectable")
+        check(partial.messages == [item], "One slow inbox does not discard working inbox messages")
+        check(partial.configured(inboxIDs: ["work"], unreadOnly: true).status == "ready", "Healthy selected inbox is not marked stale")
+        let personal = partial.configured(inboxIDs: ["personal"], unreadOnly: true)
+        check(personal.status == "partial" && personal.updatedAt == nil, "Never-loaded inbox shows pending, not caught up")
+        var failedWork = work
+        failedWork.name = "Renamed work"
+        failedWork.unreadMessages = []
+        failedWork.recentMessages = []
+        failedWork.readError = "Still loading"
+        failedWork.updatedAt = nil
+        let stale = try MailRefresh.collect(at: path) {
+            ReaderResult(inboxes: [failedWork, pending], status: "partial", detail: "Still loading")
+        }!
+        check(stale.inboxes?.first?.unreadMessages == [item], "Failed inbox preserves previous headers")
+        check(stale.inboxes?.first?.name == "Renamed work", "Discovery updates renamed accounts even on failure")
+        check(stale.configured(inboxIDs: ["work"], unreadOnly: true).updatedAt == checked, "Failed inbox retains its successful timestamp")
+        check(SnapshotStore.load(from: path).inboxes?.first?.readError != nil, "Pending state survives cache roundtrip")
+        let restored = try MailRefresh.collect(at: path) {
+            ReaderResult(inboxes: [work], status: "ready", detail: "")
+        }!
+        check(restored.inboxes?.count == 1 && restored.inboxes?.first?.readError == nil, "Recovery clears error; removed accounts leave picker")
         let attributes = try FileManager.default.attributesOfItem(atPath:path.path)
         check((attributes[.posixPermissions] as? NSNumber)?.intValue == 0o600, "Cache permissions remain private")
-        print("PASS: refresh success, preserved cache on error/Mail closed, concurrent-run exclusion, lock release, private cache")
+        print("PASS: refresh, failure preservation, lock exclusion, privacy, new syncing accounts, partial updates, scoped status, recovery")
     }
 }

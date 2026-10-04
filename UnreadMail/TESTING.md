@@ -2,6 +2,14 @@
 
 Tested locally on macOS 26.7.1, Apple Silicon.
 
+## Multiple accounts during initial sync
+
+- Diagnosed a stale one-account snapshot with a reader timeout. Apple Mail exposed both Work and Personal; a full filtered unread count alone took about 30 seconds on Personal.
+- Separated enabled-account discovery from per-inbox reads, bounded reads to 20 seconds per inbox, used Mail's reported unread count, and restricted initial header queries to recent dates with progressively wider fallback ranges.
+- Added passing collector tests for new pending inboxes remaining selectable, healthy-account updates during partial failures, preserving failed-account headers and timestamps, account renames, scoped error states, cache roundtrips, recovery, and account removal. Existing snapshot/filtering tests also passed.
+- During testing, Mail temporarily stopped answering even account-list requests. The installed collector subsequently recovered and saved both live accounts with ready status, ten unread and ten recent headers each. Verified descending order, unread flags, account IDs, and per-inbox timestamps without printing message contents.
+- Rebuilt and signature-verified the installed app and ZIP; restored enabled background refresh. The picker reads this two-account cache, but reopening the native picker was not automated in this test.
+
 ## Passed
 
 - Built the companion app and sandboxed WidgetKit extension with the installed Swift command-line toolchain.
@@ -60,3 +68,22 @@ The local build assigns a fresh bundle build number, so macOS can distinguish up
 - Logout/login and sleep/wake were not forced during testing. LaunchAgent interval timing and WidgetKit rendering remain OS-scheduled.
 
 - Final installed LaunchAgent completed two successive automatic runs with exit code 0 while the visible app was quit. Cache timestamps advanced from 19:52:52 to 19:53:57; no collector process remained between runs.
+
+## Settings, packaging, and stale-widget repair
+
+- Diagnosed the actual widget failure in chronod logs: the old extension process survived repeated installations, and new timelines were rejected with “Bundle version did not match; LaunchServices DB may need to be rebuilt”. Mail collection itself continued successfully.
+- Added `install-local.sh` to stop the old collector/widget, replace the app atomically, register the new bundle/extension, and restore requested background refresh. Verified chronod reports Reload success for Medium, Large, and Extra Large after installation.
+- Fixed misleading legacy service status: inspect the actual launchd job and configured executable path. Added tests for active, unloaded, relocated, approval-required, and off states.
+- Removed MenuBarExtra and the app's message list. Visually checked the compact settings window, including wrapped instructions and the enabled background control.
+- Added `package-local.sh`. Verified the ZIP contains the app executable/collector, Mail script, and widget extension; excludes snapshot/lock files; and passes deep strict signature verification after extraction.
+- Current ZIP is a local Apple Silicon build, not a notarized distribution build. Installation on a separate clean Mac has not been tested.
+
+- With the final settings app quit, the second scheduled agent run updated the cache at 20:05:05 and exited 0. chronod then reported Reload success for all three configured widget sizes at 20:05:05.821–20:05:05.961. No app UI process was running.
+
+## Widget click routing
+
+- Replaced automatic SwiftUI WindowGroup startup with an AppKit launch delegate that handles widget URL events before creating settings UI.
+- Message links now contain the RFC Message-ID as well as the legacy numeric ID; routing tests passed for cache-independent links, reserved characters, legacy cached links, missing messages, background/inbox clicks, explicit setup links, and malformed IDs.
+- Snapshot/filtering regression tests passed. Built, installed, and refreshed the ZIP with the same code.
+- Invoked a real installed widget message URL for an already-read cached message with the visible app quit. LaunchServices accepted the URL and the routing process exited; no settings app process remained. Background collection remained registered.
+- Final visual confirmation of the selected message in Apple Mail was blocked because the Mac was locked. This does not constitute a verified native widget-click UI test.
