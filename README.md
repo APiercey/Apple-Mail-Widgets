@@ -2,6 +2,30 @@
 
 Your latest Apple Mail messages in a native desktop widget.
 
+## Preview
+
+Fictional mail, rendered from the widget layouts.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/large-dark.png">
+  <img src="docs/screenshots/large-light.png" alt="Large Mail widget showing ten fictional messages" width="344">
+</picture>
+
+<details>
+<summary>Medium and Extra Large</summary>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/medium-dark.png">
+  <img src="docs/screenshots/medium-light.png" alt="Medium Mail widget showing three fictional messages" width="344">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/extra-large-dark.png">
+  <img src="docs/screenshots/extra-large-light.png" alt="Extra Large Mail widget showing ten fictional messages in two columns" width="720">
+</picture>
+
+</details>
+
 ## Requirements
 
 - macOS 14 or later.
