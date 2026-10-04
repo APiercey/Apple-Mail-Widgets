@@ -1,3 +1,10 @@
 build/
 *.log
 .DS_Store
+dist/
+__pycache__/
+*.p12
+*.p8
+*.key
+.env
+.env.*

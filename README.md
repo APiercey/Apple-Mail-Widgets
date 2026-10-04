@@ -7,16 +7,35 @@ Your latest Apple Mail messages in a native desktop widget.
 - macOS 14 or later.
 - An Apple Silicon Mac.
 - Accounts set up in Apple Mail.
+- Xcode in `/Applications/Xcode.app`. Tested with Xcode 27.
+- Apple's Command Line Tools.
 
-Current build: not yet notarized. Public releases will be on GitHub Releases.
+No paid Apple Developer account is needed. Build and install on your own Mac.
 
-## Set up
+## Install from source
 
-1. Unzip `AppleMailWidgets.zip`.
-2. Move `AppleMailWidgets.app` to Applications.
-3. Open the app and click **Connect Apple Mail**.
-4. Allow access to Mail when macOS asks.
-5. Turn on **Refresh in background**.
+1. Install Xcode, open it, and complete its setup.
+2. Install Command Line Tools in Terminal:
+
+   ```sh
+   xcode-select --install
+   ```
+
+3. Run:
+
+   ```sh
+   git clone https://github.com/APiercey/Apple-Mail-Widgets.git
+   cd Apple-Mail-Widgets/AppleMailWidgets
+   ./build-local.sh && ./install-local.sh
+   ```
+
+The app opens from `~/Applications/AppleMailWidgets.app`.
+
+## Connect Mail
+
+1. Click **Connect Apple Mail**.
+2. Allow access to Mail when macOS asks.
+3. Turn on **Refresh in background**.
 
 ## Add a widget
 
@@ -48,6 +67,15 @@ Current build: not yet notarized. Public releases will be on GitHub Releases.
 
 - Mail metadata stays on your Mac.
 - Message bodies and attachments are not collected.
+
+## Update
+
+From the same source folder:
+
+```sh
+git pull --ff-only
+./build-local.sh && ./install-local.sh
+```
 
 ## Remove
 
