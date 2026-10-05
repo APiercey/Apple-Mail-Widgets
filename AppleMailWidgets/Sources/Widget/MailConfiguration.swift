@@ -30,14 +30,20 @@ struct MailConfiguration: WidgetConfigurationIntent {
     @Parameter(title: "Only unread", default: true)
     var unreadOnly: Bool
 
+    // App Intents requires a literal bound. This is the native Int limit, not a day-count cap.
+    @Parameter(title: "Last X days", description: "1 means today, 2 includes yesterday. Leave blank for any date.",
+               controlStyle: .field, inclusiveRange: (1, 9223372036854775807))
+    var lastDays: Int?
+
     static var parameterSummary: some ParameterSummary {
         Summary {
             \.$inboxIDs
             \.$unreadOnly
+            \.$lastDays
         }
     }
 
-    func snapshot(from source: MailSnapshot) -> MailSnapshot {
+    func snapshot(from source: MailSnapshot, now: Date = .now, calendar: Calendar = .current) -> MailSnapshot {
         guard let inboxIDs, !inboxIDs.isEmpty else {
             var result = source
             result.messages = []
@@ -48,6 +54,12 @@ struct MailConfiguration: WidgetConfigurationIntent {
         }
         return source.configured(inboxIDs: inboxIDs.contains(InboxOptions.allInboxes) ? [] : inboxIDs,
                                  unreadOnly: unreadOnly)
+            .filtered(lastDays: lastDays, now: now, calendar: calendar)
+    }
+
+    var dateScope: String? {
+        guard let lastDays else { return nil }
+        return lastDays <= 1 ? "today" : "in the last \(lastDays) days"
     }
 
     func scope(in source: MailSnapshot) -> String {

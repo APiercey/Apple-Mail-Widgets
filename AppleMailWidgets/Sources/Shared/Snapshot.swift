@@ -93,6 +93,22 @@ struct MailSnapshot: Codable, Equatable {
         }
         return result
     }
+    /// Filter already-scoped headers. The newest ten per inbox are sufficient:
+    /// messages outside that prefix cannot outrank its newer messages inside a date window.
+    /// The unread count remains the inbox total, not a count of cached headers.
+    func filtered(lastDays: Int?, now: Date = .now, calendar: Calendar = .current) -> MailSnapshot {
+        guard let lastDays else { return self }
+        let days = max(1, lastDays)
+        let today = calendar.startOfDay(for: now)
+        // Avoid overflowing Calendar for huge inputs. No product-level maximum.
+        let availableDays = calendar.dateComponents([.day], from: .distantPast, to: today).day ?? 0
+        let cutoff = days > availableDays ? Date.distantPast :
+            (calendar.date(byAdding: .day, value: 1 - days, to: today) ?? .distantPast)
+        var result = self
+        result.messages = messages.filter { $0.receivedAt >= cutoff }
+        return result
+    }
+
     var allCachedMessages: [MailItem] {
         messages + (inboxes ?? []).flatMap { $0.recentMessages + $0.unreadMessages }
     }

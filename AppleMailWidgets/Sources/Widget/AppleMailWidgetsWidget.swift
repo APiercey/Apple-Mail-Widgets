@@ -18,10 +18,18 @@ struct MailProvider: AppIntentTimelineProvider {
         entry(configuration)
     }
     func timeline(for configuration: MailConfiguration, in context: Context) async -> Timeline<MailEntry> {
-        Timeline(entries: [entry(configuration)], policy: .after(.now.addingTimeInterval(300)))
+        let now = Date.now
+        let source = SnapshotStore.load()
+        var entries = [entry(configuration, source: source, date: now)]
+        // Schedule the local-day boundary even if collection is paused overnight.
+        if configuration.lastDays != nil,
+           let midnight = Calendar.current.dateInterval(of: .day, for: now)?.end {
+            entries.append(entry(configuration, source: source, date: midnight))
+        }
+        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(300)))
     }
-    private func entry(_ configuration: MailConfiguration) -> MailEntry {
-        MailEntry(date: .now, snapshot: configuration.snapshot(from: SnapshotStore.load()), configuration: configuration)
+    private func entry(_ configuration: MailConfiguration, source: MailSnapshot = SnapshotStore.load(), date: Date = .now) -> MailEntry {
+        MailEntry(date: date, snapshot: configuration.snapshot(from: source, now: date), configuration: configuration)
     }
 }
 struct MailWidgetView: View {
@@ -80,7 +88,7 @@ struct MailWidgetView: View {
             Text(entry.snapshot.status == "selectionRequired" ? "Choose inboxes" :
                  entry.snapshot.status == "ready" ? (entry.configuration.unreadOnly ? "All caught up" : "No messages") : "Mail needs attention")
                 .font(.headline)
-            Text(entry.snapshot.status == "ready" ? "No \(entry.configuration.unreadOnly ? "unread " : "")messages in these inboxes." : entry.snapshot.detail)
+            Text(entry.snapshot.status == "ready" ? "No \(entry.configuration.unreadOnly ? "unread " : "")messages\(entry.configuration.dateScope.map { " \($0)" } ?? "") in these inboxes." : entry.snapshot.detail)
                 .font(.caption).foregroundStyle(.secondary)
         }
     }

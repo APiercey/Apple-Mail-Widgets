@@ -2,6 +2,14 @@
 
 Tested locally on macOS 26.7.1, Apple Silicon.
 
+## Last X days (5 October 2026)
+
+- Added an optional native integer field to each widget. Minimum 1, no product maximum. Blank preserves existing behavior. Days use local calendar boundaries, with 1 meaning today.
+- Filtering uses cached headers after inbox selection. Mail collection and total unread counts are unchanged. The timeline includes an entry for the next local midnight.
+- Configuration tests passed for local midnight, two-day windows, both DST transitions, inbox isolation, unread/all modes, unset values, invalid values, and Int.max. Existing snapshot tests passed.
+- Built, signature-verified, and installed. Extracted App Intents metadata declares an optional number field with minimum 1. Native intent decoding preserved unset, 1, 2, and 1,000,000. WidgetKit logs confirmed successful reloads after installation.
+- The UI automation could not target the Mail widget editor, so direct typing into the field remains unverified.
+
 ## Inbox selection and loading repair
 
 - Native logs showed AppEntity identifiers failing to resolve in the local ad-hoc build. Replaced entity selections with stable string IDs and named options. Missing selections now ask for setup instead of showing every account.

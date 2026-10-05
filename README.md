@@ -46,3 +46,6 @@ If you right click on the widget, you can see further options to customize.
 
 - Select one or more inboxes, or choose **All Inboxes**.
 - After updating, choose inboxes again if the widget asks you to.
+- Set **Last X days**: **1** for today, **2** for today and yesterday. Leave blank for any date.
+- Days start at local midnight. Minimum 1, with no set maximum.
+- The unread count is the total for your selected inboxes, across all dates.
