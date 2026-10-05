@@ -7,8 +7,7 @@ struct MailEntry: TimelineEntry {
     let snapshot: MailSnapshot
     let configuration: MailConfiguration
     var scope: String {
-        guard let chosen = configuration.inboxes, !chosen.isEmpty else { return "All Inboxes" }
-        return chosen.count == 1 ? chosen[0].name.components(separatedBy: " · ")[0] : "\(chosen.count) inboxes"
+        configuration.scope(in: snapshot)
     }
 }
 struct MailProvider: AppIntentTimelineProvider {
@@ -22,8 +21,7 @@ struct MailProvider: AppIntentTimelineProvider {
         Timeline(entries: [entry(configuration)], policy: .after(.now.addingTimeInterval(300)))
     }
     private func entry(_ configuration: MailConfiguration) -> MailEntry {
-        MailEntry(date: .now, snapshot: SnapshotStore.load().configured(
-            inboxIDs: configuration.inboxes?.map(\.id) ?? [], unreadOnly: configuration.unreadOnly), configuration: configuration)
+        MailEntry(date: .now, snapshot: configuration.snapshot(from: SnapshotStore.load()), configuration: configuration)
     }
 }
 struct MailWidgetView: View {
@@ -39,7 +37,7 @@ struct MailWidgetView: View {
                     Image(systemName: "envelope.fill").foregroundStyle(.tint)
                     Text("Mail").font(.headline)
                     Spacer()
-                    Text(entry.snapshot.updatedAt == nil || entry.snapshot.status == "partial" ? "— unread" : "\(entry.snapshot.unreadCount) unread")
+                    Text(entry.snapshot.updatedAt == nil || ["partial", "selectionRequired"].contains(entry.snapshot.status) ? "— unread" : "\(entry.snapshot.unreadCount) unread")
                         .font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
                 }
                 if entry.snapshot.updatedAt == nil || entry.snapshot.messages.isEmpty {
@@ -61,7 +59,9 @@ struct MailWidgetView: View {
                 HStack(spacing: 4) {
                     Text(entry.scope).lineLimit(1)
                     Spacer(minLength: 8)
-                    if entry.snapshot.status != "ready" && entry.snapshot.updatedAt != nil {
+                    if entry.snapshot.status == "selectionRequired" {
+                        Text("Edit widget")
+                    } else if entry.snapshot.status != "ready" && entry.snapshot.updatedAt != nil {
                         Image(systemName: "exclamationmark.circle")
                         Text("Cached")
                     } else if let updated = entry.snapshot.updatedAt {
@@ -77,7 +77,8 @@ struct MailWidgetView: View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: entry.snapshot.status == "ready" ? "checkmark.circle" : "envelope")
                 .font(.title2).foregroundStyle(.secondary)
-            Text(entry.snapshot.status == "ready" ? (entry.configuration.unreadOnly ? "All caught up" : "No messages") : "Mail needs attention")
+            Text(entry.snapshot.status == "selectionRequired" ? "Choose inboxes" :
+                 entry.snapshot.status == "ready" ? (entry.configuration.unreadOnly ? "All caught up" : "No messages") : "Mail needs attention")
                 .font(.headline)
             Text(entry.snapshot.status == "ready" ? "No \(entry.configuration.unreadOnly ? "unread " : "")messages in these inboxes." : entry.snapshot.detail)
                 .font(.caption).foregroundStyle(.secondary)

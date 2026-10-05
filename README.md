@@ -43,3 +43,6 @@ First, open the application. You will need to click "Connect Apple Mail" to get 
 Afterwards, you are able to add a widget directly on the desktop.
 
 If you right click on the widget, you can see further options to customize.
+
+- Select one or more inboxes, or choose **All Inboxes**.
+- After updating, choose inboxes again if the widget asks you to.

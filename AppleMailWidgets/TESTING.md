@@ -2,6 +2,16 @@
 
 Tested locally on macOS 26.7.1, Apple Silicon.
 
+## Inbox selection and loading repair
+
+- Native logs showed AppEntity identifiers failing to resolve in the local ad-hoc build. Replaced entity selections with stable string IDs and named options. Missing selections now ask for setup instead of showing every account.
+- Measured the larger inbox read at 22.22 seconds, exceeding the 20-second timeout. The unread count took about 8 milliseconds. Bulk metadata reads reduced that inbox read to 2.12 seconds and matched the independently checked newest ten message IDs.
+- Added fixture tests for string selections, account isolation, unread/all modes, missing selections, account renames/removal, legacy caches, newest-message ordering, deleted/junk exclusions, and concurrent mailbox changes. New tests and existing snapshot tests passed.
+- Fixed quiet installation to launch the app through Launch Services. Registration alone left the replaced app launch-disabled and prevented App Intents from loading. Verified the corrected installer and installed signatures.
+- Backed up local desktop widget settings and recovered the existing selections while preserving positions and sizes. This local recovery is not part of the installer. Other existing installations may need to select inboxes again.
+- Verified fresh WidgetKit render archives: Large contained ten messages from its selected account and none from the other account. Medium and Extra Large used All Inboxes. Native logs confirmed successful string-parameter decoding and rendering for all three sizes.
+- Picker clicks were not automated. Native configuration decoding and actual rendered widget contents were verified directly. WidgetKit still controls redraw timing.
+
 ## AppleMailWidgets project rename
 
 - Final identity change: host `com.applemailwidgets.AppleMailWidgets`, extension `.Widget`, agent `.Refresh`, widget kind `AppleMailWidgetsWidget`, URL scheme `applemailwidgets`, and cache directory `Application Support/AppleMailWidgets`.

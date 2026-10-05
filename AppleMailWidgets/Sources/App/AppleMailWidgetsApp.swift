@@ -136,7 +136,7 @@ struct ContentView: View {
                     instruction(1, "Control-click the desktop and choose **Edit Widgets**.")
                     instruction(2, "Find **AppleMailWidgets**, choose a size, and add a **Mail** widget.")
                     instruction(3, "Control-click your widget and choose **Edit “Mail”**.")
-                    instruction(4, "Choose one or more inboxes. Leave the selection empty for all inboxes.")
+                    instruction(4, "Choose one or more inboxes, or choose All Inboxes.")
                     instruction(5, "Keep **Only unread** on for unread messages, or turn it off to show all recent mail.")
                 }
                 .font(.callout)

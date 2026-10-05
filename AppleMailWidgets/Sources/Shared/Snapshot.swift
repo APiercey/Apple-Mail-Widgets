@@ -64,7 +64,16 @@ struct MailSnapshot: Codable, Equatable {
     }
     /// An empty selection means all inboxes; missing selected inboxes never fall back to other mail.
     func configured(inboxIDs: [String], unreadOnly: Bool) -> MailSnapshot {
-        guard let inboxes else { return newestTen() } // Existing v1 cache while first refresh runs.
+        guard let inboxes else {
+            // Old caches cannot prove which account owns a message.
+            guard !inboxIDs.isEmpty else { return newestTen() }
+            var result = self
+            result.messages = []
+            result.unreadCount = 0
+            result.status = "inboxUnavailable"
+            result.detail = "Refresh AppleMailWidgets to load the selected inbox."
+            return result
+        }
         let selected = Set(inboxIDs)
         let chosen = inboxes.filter { selected.isEmpty || selected.contains($0.id) }
         var result = self

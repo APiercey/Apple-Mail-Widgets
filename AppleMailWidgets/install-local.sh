@@ -33,5 +33,11 @@ codesign --verify --deep --strict "$installed_app"
 if [[ "$restart_background" == 1 ]]; then
     "$installed_app/Contents/MacOS/AppleMailWidgets" --enable-background
 fi
-if [[ "${1:-}" != "--no-open" ]]; then open "$installed_app"; fi
+# A Launch Services launch is required even for a quiet install. Registration
+# alone leaves a replaced app launch-disabled, so App Intents cannot index it.
+if [[ "${1:-}" == "--no-open" ]]; then
+    open -g -j "$installed_app" --args --background-status
+else
+    open "$installed_app"
+fi
 printf 'Installed %s\n' "$installed_app"
